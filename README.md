@@ -1,4 +1,4 @@
-Benchark scripts for the first ECMWF InClass Competetition
+Benchark scripts and more for the first ECMWF InClass Competetition
 
 Predict impact of air pollution on mortality rates: 
 
