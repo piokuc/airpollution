@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.neighbors import KNeighborsRegressor
 
 from sklearn import svm
 from sklearn.model_selection import GridSearchCV
@@ -26,7 +27,10 @@ X_train = train[features]
 y = train['mortality_rate'].copy()
 X_test = test[features].copy()
 
-models = [('random_forest', RandomForestRegressor(), 
+models = [('kneighbours', KNeighborsRegressor(),
+              {'n_neighbors':[2,5,7,10,15,20],
+               'leaf_size':[10,20,30,50,100]}),
+          ('random_forest', RandomForestRegressor(), 
               {'n_estimators':[10,20,30,50]}),
           ('svr', svm.SVR(), 
               {'kernel':('linear', 'rbf'), 
