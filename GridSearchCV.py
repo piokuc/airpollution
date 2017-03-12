@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+
 from sklearn import svm
 from sklearn.model_selection import GridSearchCV
 
@@ -22,21 +24,23 @@ train = train.dropna(axis=0, how = 'any')
 
 X_train = train[features]
 y = train['mortality_rate'].copy()
-
 X_test = test[features].copy()
 
-parameters = {'kernel':('linear', 'rbf'), 'C':[1, 2, 5, 8, 10]}
-svr = svm.SVR()
+models = [('random_forest', RandomForestRegressor(), 
+              {'n_estimators':[10,20,30,50]}),
+          ('svr', svm.SVR(), 
+              {'kernel':('linear', 'rbf'), 
+               'C':[1, 2, 5, 8, 10]})]
 
-# http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+for algo, regressor, parameters in models:
+    # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+    model = GridSearchCV(regressor, parameters, n_jobs = 4, verbose = 1)
+    print "best',algo,'model:", model
+    print dir(model)
 
-model = GridSearchCV(svr, parameters, n_jobs = 4, verbose = 99)
-print "best model:", model
-print dir(model)
+    model.fit(X_train, y)
 
-model.fit(X_train, y)
+    predictions = test[['Id']].copy()
+    predictions['mortality_rate'] = model.predict(X_test)
 
-predictions = test[['Id']].copy()
-predictions['mortality_rate'] = model.predict(X_test)
-
-predictions.to_csv('svr.csv', index = False)
+    predictions.to_csv(algo + '.csv', index = False)
