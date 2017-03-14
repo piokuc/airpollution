@@ -28,23 +28,24 @@ y = train['mortality_rate'].copy()
 X_test = test[features].copy()
 
 models = [('kneighbours', KNeighborsRegressor(),
-              {'n_neighbors':[2,5,7,10,15,20],
-               'leaf_size':[10,20,30,50,100]}),
+              {'n_neighbors':[2,5,7,10,15,20,30,40,50],
+               'leaf_size':[1,2,5,10,20,30,50,100]}),
           ('random_forest', RandomForestRegressor(), 
               {'n_estimators':[10,20,30,50]}),
           ('svr', svm.SVR(), 
               {'kernel':('linear', 'rbf'), 
                'C':[1, 2, 5, 8, 10]})]
 
-for algo, regressor, parameters in models:
-    # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
-    model = GridSearchCV(regressor, parameters, n_jobs = 4, verbose = 1)
-    print "best',algo,'model:", model
-    print dir(model)
+def file_name(algo_name, params):
+    return algo_name + ':' + ','.join([str(k)+'='+str(v) for k,v in params.items()]) + '.csv'
 
+for algo_name, regressor, parameters in models:
+    # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+    model = GridSearchCV(regressor, parameters, n_jobs = 4, verbose = 0)
     model.fit(X_train, y)
+    print algo_name + ': Checked', parameters, 'the best is:', model.best_params_
 
     predictions = test[['Id']].copy()
     predictions['mortality_rate'] = model.predict(X_test)
 
-    predictions.to_csv(algo + '.csv', index = False)
+    predictions.to_csv(file_name(algo_name, model.best_params_), index = False)
